@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>🎉 Spin & Win!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff6b81;
+            --secondary-color: #ff9f43;
+            --background-start: #fceabb;
+            --background-end: #f8b500;
+            --text-dark: #333;
+            --text-light: #fff;
+            --button-color: linear-gradient(145deg, #ff6b81, #ff4757);
+            --button-shadow: 0 8px 25px rgba(255, 107, 129, 0.5);
+            --wheel-border: #fff;
+            --wheel-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            --arrow-color: #ff6b81;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--background-start), var(--background-end));
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: var(--text-dark);
+            padding: 20px;
+            padding-bottom: 60px;
+        }
+
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: var(--wheel-shadow);
+            max-width: 90%;
+            width: 500px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: clamp(1.8em, 5vw, 2.8em);
+            font-weight: 700;
+        }
+
+        .wheel-container {
+            position: relative;
+            display: inline-block;
+            margin: 20px 0;
+            user-select: none;
+        }
+
+        .wheel {
+            width: clamp(260px, 70vw, 400px);
+            height: clamp(260px, 70vw, 400px);
+            border-radius: 50%;
+            position: relative;
+            border: 10px solid var(--wheel-border);
+            box-shadow: var(--wheel-shadow);
+            transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+            overflow: hidden;
+        }
+
+        .wheel svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .segment-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(10px, 2vw, 16px);
+            font-weight: 600;
+            fill: var(--text-light);
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .segment-text.dark {
+            fill: var(--text-dark);
+        }
+
+        .arrow {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid var(--arrow-color);
+            z-index: 10;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: clamp(60px, 15vw, 90px);
+            height: clamp(60px, 15vw, 90px);
+            background: var(--wheel-border);
+            border-radius: 50%;
+            z-index: 5;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: clamp(12px, 3vw, 18px);
+            cursor: pointer;
+        }
+
+        .center-circle:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        }
+
+        .spin-button {
+            background: var(--button-color);
+            color: var(--text-light);
+            border: none;
+            padding: 15px 40px;
+            font-size: clamp(16px, 4vw, 20px);
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: var(--button-shadow);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .spin-button:hover {
+            box-shadow: 0 10px 30px rgba(255, 107, 129, 0.7);
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        .spin-button:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 15px rgba(255, 107, 129, 0.5);
+        }
+
+        .spin-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--text-light);
+            border-radius: 20px;
+            color: var(--text-dark);
+            font-size: clamp(16px, 4vw, 22px);
+            font-weight: 600;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .result strong {
+            color: var(--primary-color);
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 1000;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+                max-width: 100%;
+            }
+
+            .wheel {
+                width: 260px;
+                height: 260px;
+            }
+
+            .center-circle {
+                width: 60px;
+                height: 60px;
+                font-size: 12px;
+            }
+
+            .arrow {
+                border-left: 12px solid transparent;
+                border-right: 12px solid transparent;
+                border-top: 25px solid var(--arrow-color);
+                top: -8px;
+            }
+
+            .spin-button {
+                padding: 12px 28px;
+                font-size: 15px;
+            }
+
+            .result {
+                font-size: 14px;
+                padding: 15px;
+            }
+
+            .segment-text {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎁 SPIN & MENANGKAN HADIAH! 🎁</h1>
+        <div class="wheel-container">
+            <div class="arrow"></div>
+            <div class="wheel" id="wheel">
+                <svg viewBox="0 0 400 400"></svg>
+            </div>
+            <div class="center-circle" onclick="spin()">SPIN!</div>
+        </div>
+        <button class="spin-button" id="spinBtn">🎯 PUTAR RODA!</button>
+        <div class="result" id="result">Klik tombol atau lingkaran tengah untuk memutar roda!</div>
+    </div>
+
+    <script>
+        const wheel = document.getElementById('wheel');
+        const spinBtn = document.getElementById('spinBtn');
+        const result = document.getElementById('result');
+
+        const prizes = ['iPhone 15','Voucher 100k','Laptop Gaming','Smartwatch','Uang 500k','AirPods Pro','Sepeda MTB','PS5'];
+
+        let isSpinning = false;
+        let currentRotation = 0;
+
+        function createWheel() {
+            const svg = wheel.querySelector('svg');
+            svg.innerHTML = '';
+
+            const colors = ['#ff6b81', '#54e346', '#2196f3', '#fbc531', '#ff5e57', '#a55eea', '#0fbcf9', '#e84118'];
+            const segmentAngle = 360 / prizes.length;
+
+            for (let i = 0; i < prizes.length; i++) {
+                const startAngle = -90 + (i * segmentAngle);
+                const endAngle = -90 + ((i + 1) * segmentAngle);
+                const startRad = (startAngle * Math.PI) / 180;
+                const endRad = (endAngle * Math.PI) / 180;
+
+                const x1 = 200 + 200 * Math.cos(startRad);
+                const y1 = 200 + 200 * Math.sin(startRad);
+                const x2 = 200 + 200 * Math.cos(endRad);
+                const y2 = 200 + 200 * Math.sin(endRad);
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', `M 200,200 L ${x1},${y1} A 200,200 0 0,1 ${x2},${y2} Z`);
+                path.setAttribute('fill', colors[i]);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                const textAngle = startAngle + segmentAngle / 2;
+                const textRad = (textAngle * Math.PI) / 180;
+                const textX = 200 + 120 * Math.cos(textRad);
+                const textY = 200 + 120 * Math.sin(textRad);
+
+                text.setAttribute('x', textX);
+                text.setAttribute('y', textY);
+                text.setAttribute('class', colors[i] === '#fbc531' ? 'segment-text dark' : 'segment-text');
+                text.setAttribute('transform', `rotate(${textAngle + 90}, ${textX}, ${textY})`);
+                text.textContent = prizes[i];
+
+                svg.appendChild(path);
+                svg.appendChild(text);
+            }
+        }
+
+        createWheel();
+
+        function spin() {
+            if (isSpinning) return;
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+            spinBtn.textContent = '🌪️ BERPUTAR...';
+            result.textContent = 'Roda sedang berputar...';
+
+            const minSpins = 5;
+            const maxSpins = 8;
+            const spins = Math.random() * (maxSpins - minSpins) + minSpins;
+            const finalAngle = Math.random() * 360;
+            const totalRotation = (spins * 360) + finalAngle;
+
+            const newRotation = currentRotation + totalRotation;
+            wheel.style.transform = `rotate(${newRotation}deg)`;
+
+            const finalPosition = newRotation % 360;
+            const normalizedAngle = (360 - finalPosition) % 360;
+            const segmentAngle = 360 / prizes.length;
+            const winningIndex = Math.floor(normalizedAngle / segmentAngle);
+            const winningPrize = prizes[winningIndex];
+
+            currentRotation = newRotation;
+
+            setTimeout(() => {
+                result.innerHTML = `🎉 SELAMAT! Anda memenangkan: <strong>${winningPrize}</strong>! 🎉`;
+                createConfetti();
+                isSpinning = false;
+                spinBtn.disabled = false;
+                spinBtn.textContent = '🎯 PUTAR LAGI!';
+            }, 4000);
+        }
+
+        function createConfetti() {
+            const colors = ['#ff6b81', '#54e346', '#2196f3', '#fbc531', '#ff5e57', '#a55eea'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear`;
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 5000);
+                }, i * 50);
+            }
+        }
+    </script>
+</body>
+</html>
